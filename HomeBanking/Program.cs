@@ -7,12 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(x =>
-    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddDbContext<HomeBankingContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("HomeBankingConexion")));
 
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -49,8 +50,14 @@ else
     app.UseSwaggerUI();
 }
 
-app.UseAuthorization();
+app.UseDefaultFiles();
+
+app.UseStaticFiles();
+
+app.UseRouting();
 
 app.MapControllers();
+
+app.UseAuthorization();
 
 app.Run();

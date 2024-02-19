@@ -63,7 +63,6 @@ namespace HomeBanking.Controllers
                         LastName = client.LastName,
 
                         Accounts = client.Accounts.Select(ac => new AccountDTO
-
                         {
 
                             Id = ac.Id,
@@ -75,7 +74,6 @@ namespace HomeBanking.Controllers
                             Number = ac.Number
 
                         }).ToList()
-
                     };
                     clientsDTO.Add(newClientDTO);
                 }

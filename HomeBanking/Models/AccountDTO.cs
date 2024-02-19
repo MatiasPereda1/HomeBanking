@@ -9,5 +9,6 @@
         public DateTime CreationDate { get; set; }
 
         public double Balance { get; set; }
+        public IEnumerable<TransactionDTO> Transactions { get; set; }
     }
 }
