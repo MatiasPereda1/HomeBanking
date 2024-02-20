@@ -15,6 +15,6 @@ namespace HomeBanking.Models
         public string Email { get; set; }
 
         public ICollection<AccountDTO> Accounts { get; set; }
-
+        public ICollection<ClientLoanDTO> Loans { get; set; }
     }
 }

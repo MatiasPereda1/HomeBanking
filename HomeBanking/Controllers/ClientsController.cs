@@ -73,6 +73,14 @@ namespace HomeBanking.Controllers
 
                             Number = ac.Number
 
+                        }).ToList(),
+                        Loans = client.ClientLoans.Select(cl => new ClientLoanDTO
+                        {
+                            Id = cl.Id,
+                            LoanId = cl.LoanId,
+                            Name = cl.Loan.Name,
+                            Amount = cl.Amount,
+                            Payments = int.Parse(cl.Payments)
                         }).ToList()
                     };
                     clientsDTO.Add(newClientDTO);
@@ -85,9 +93,7 @@ namespace HomeBanking.Controllers
             catch (Exception ex)
 
             {
-
                 return StatusCode(500, ex.Message);
-
             }
 
         }
@@ -129,19 +135,20 @@ namespace HomeBanking.Controllers
                     LastName = client.LastName,
 
                     Accounts = client.Accounts.Select(ac => new AccountDTO
-
                     {
-
                         Id = ac.Id,
-
                         Balance = ac.Balance,
-
                         CreationDate = ac.CreationDate,
-
                         Number = ac.Number
-
+                    }).ToList(),
+                    Loans = client.ClientLoans.Select(cl => new ClientLoanDTO
+                    {
+                        Id = cl.Id,
+                        LoanId = cl.LoanId,
+                        Name = cl.Loan.Name,
+                        Amount = cl.Amount,
+                        Payments = int.Parse(cl.Payments)
                     }).ToList()
-
                 };
 
                 return Ok(clientDTO);
