@@ -1,4 +1,6 @@
-﻿namespace HomeBanking.Models
+﻿using HomeBanking.Models.Enums;
+
+namespace HomeBanking.Models
 {
     public class Card
     {
@@ -12,6 +14,5 @@
         public DateTime ThruDate { get; set; }
         public Client Client { get; set; }
         public long ClientId { get; set; }
-        public ICollection<CardDTO> Cards { get; set; }
     }
 }

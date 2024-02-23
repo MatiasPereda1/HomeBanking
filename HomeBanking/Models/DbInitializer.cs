@@ -1,4 +1,6 @@
-﻿namespace HomeBanking.Models
+﻿using HomeBanking.Models.Enums;
+
+namespace HomeBanking.Models
 {
     public class DbInitializer 
     {
@@ -48,7 +50,6 @@
                         context.Accounts.Add(account);
                     }
                     context.SaveChanges();
-
                 }
             }
 
