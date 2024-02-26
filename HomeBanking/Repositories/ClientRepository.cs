@@ -8,6 +8,12 @@ namespace HomeBanking.Repositories
         public ClientRepository(HomeBankingContext repositoryContext) : base(repositoryContext)
         {
         }
+
+        public bool ExistsByEmail(string email)
+        {
+            return FindByCondition(client => client.Email.ToUpper() == email.ToUpper()).Any();
+        }
+
         public Client FindByEmail(string email)
         {
             return FindByCondition(client => client.Email.ToUpper() == email.ToUpper())
@@ -42,5 +48,7 @@ namespace HomeBanking.Repositories
             Create(client);
             SaveChanges();
         }
+
+
     }
 }

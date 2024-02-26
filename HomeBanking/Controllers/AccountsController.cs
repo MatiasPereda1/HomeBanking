@@ -68,12 +68,9 @@ namespace HomeBanking.Controllers
 
                 string email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
 
-                Account account = _accountRepository.FindById(id);
+                Account account = _accountRepository.FindByIdAndClientEmail(id, email);
 
                 if (account == null)
-                    return Forbid();
-
-                if (account.Client.Email != email)
                     return Forbid();
 
                 var accountDto = new AccountDTO

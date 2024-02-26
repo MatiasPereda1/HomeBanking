@@ -29,16 +29,9 @@ namespace HomeBanking.Controllers
                 if (user == null || !String.Equals(user.Password, client.Password))
                     return Unauthorized();
 
-                var claims = new List<Claim>{};
-
-                if (Regex.IsMatch(client.Email, @".*@vinotinto\.com")) 
-                {
-                    claims.Add(new Claim("Admin", user.Email));
-                }
-                else
-                {
-                    claims.Add(new Claim("Client", user.Email));
-                }                
+                var claims = new List<Claim>{
+                    new Claim(Regex.IsMatch(client.Email, @".*@vinotinto\.com") ? "Admin" : "Client", user.Email)
+                };
 
                 var claimsIdentity = new ClaimsIdentity(
                     claims,

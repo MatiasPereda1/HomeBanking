@@ -13,7 +13,13 @@ namespace HomeBanking.Repositories
         {
             return FindByCondition(account  => account.Id == id)
                 .Include(account => account.Transactions)
-                .Include(account => account.Client)
+                .FirstOrDefault();
+        }
+
+        public Account FindByIdAndClientEmail(long id, string email)
+        {
+            return FindByCondition(account => account.Id == id && account.Client.Email == email)
+                .Include(account => account.Transactions)
                 .FirstOrDefault();
         }
 

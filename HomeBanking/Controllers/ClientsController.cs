@@ -206,9 +206,7 @@ namespace HomeBanking.Controllers
                     return StatusCode(403, "apellido inválido");
 
                 //buscamos si ya existe el usuario
-                Client user = _clientRepository.FindByEmail(client.Email);
-
-                if (user != null)
+                if (_clientRepository.ExistsByEmail(client.Email))
                 {
                     return StatusCode(403, "Email está en uso");
                 }
