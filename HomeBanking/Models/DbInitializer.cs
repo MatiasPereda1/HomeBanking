@@ -10,7 +10,7 @@ namespace HomeBanking.Models
             {
                 var clients = new Client[]
                 {
-                    new Client { Email = "vcoronado@gmail.com", FirstName="Victor", LastName="Coronado", Password="123456"},
+                    new Client { Email = "vcoronado@vinotinto.com", FirstName="Victor", LastName="Coronado", Password="123456"},
                     new Client { Email = "jcaballero@gmail.com", FirstName="Julian", LastName="Caballero", Password="123456"}
                 };
 
@@ -22,7 +22,7 @@ namespace HomeBanking.Models
 
             if (!context.Accounts.Any())
             {
-                var accountVictor = context.Clients.FirstOrDefault(c => c.Email == "vcoronado@gmail.com");
+                var accountVictor = context.Clients.FirstOrDefault(c => c.Email == "vcoronado@vinotinto.com");
                 if (accountVictor != null)
                 {
                     var accounts = new Account[]
@@ -193,7 +193,7 @@ namespace HomeBanking.Models
             if (!context.Cards.Any())
             {
                 //buscamos al unico cliente
-                var client1 = context.Clients.FirstOrDefault(c => c.Email == "vcoronado@gmail.com");
+                var client1 = context.Clients.FirstOrDefault(c => c.Email == "vcoronado@vinotinto.com");
                 if (client1 != null)
                 {
                     //le agregamos 2 tarjetas de crédito una GOLD y una TITANIUM, de tipo DEBITO Y CREDITO RESPECTIVAMENTE

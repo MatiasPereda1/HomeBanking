@@ -1,6 +1,7 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Models;
 using HomeBanking.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult Get()
         {
             try
@@ -54,13 +56,24 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult Get(int id)
         {
             try
             {
-                var account = _accountRepository.FindById(id);
+                if (User.FindFirst("Client") == null && User.FindFirst("Admin") == null)
+                {
+                    return Forbid();
+                }
+
+                string email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
+
+                Account account = _accountRepository.FindById(id);
 
                 if (account == null)
+                    return Forbid();
+
+                if (account.Client.Email != email)
                     return Forbid();
 
                 var accountDto = new AccountDTO

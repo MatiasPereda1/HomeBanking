@@ -24,7 +24,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 //autorización
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("ClientOnly", policy => policy.RequireClaim("Client"));
+    options.AddPolicy("ClientOnly", policy => 
+    {
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "Admin") ||
+            context.User.HasClaim(c => c.Type == "Client"));
+    });
+
+    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Admin"));
 });
 
 builder.Services.AddScoped<IClientRepository, ClientRepository>();

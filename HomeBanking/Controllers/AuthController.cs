@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
+using HomeBanking.DTOs;
 
 namespace HomeBanking.Controllers
 {
@@ -19,7 +21,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] Client client)
+        public async Task<IActionResult> Login([FromBody] UserDTO client)
         {
             try
             {
@@ -27,10 +29,16 @@ namespace HomeBanking.Controllers
                 if (user == null || !String.Equals(user.Password, client.Password))
                     return Unauthorized();
 
-                var claims = new List<Claim>
+                var claims = new List<Claim>{};
+
+                if (Regex.IsMatch(client.Email, @".*@vinotinto\.com")) 
                 {
-                    new Claim("Client", user.Email),
-                };
+                    claims.Add(new Claim("Admin", user.Email));
+                }
+                else
+                {
+                    claims.Add(new Claim("Client", user.Email));
+                }                
 
                 var claimsIdentity = new ClaimsIdentity(
                     claims,

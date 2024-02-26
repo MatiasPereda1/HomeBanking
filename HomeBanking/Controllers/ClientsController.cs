@@ -1,6 +1,7 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Models;
 using HomeBanking.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult Get()
         {
             try
@@ -71,6 +73,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult Get(long id)
         {
             try
@@ -124,15 +127,17 @@ namespace HomeBanking.Controllers
             }
         }
         [HttpGet("current")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult GetCurrent()
         {
             try
             {
-                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
-                if (email == string.Empty)
+                if (User.FindFirst("Client") == null && User.FindFirst("Admin") == null)
                 {
                     return Forbid();
                 }
+
+                string email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
 
                 Client client = _clientRepository.FindByEmail(email);
 
@@ -183,13 +188,22 @@ namespace HomeBanking.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Client client)
+        public IActionResult Post([FromBody] UserDTO client)
         {
             try
             {
                 //validamos datos antes
-                if (String.IsNullOrEmpty(client.Email) || String.IsNullOrEmpty(client.Password) || String.IsNullOrEmpty(client.FirstName) || String.IsNullOrEmpty(client.LastName))
-                    return StatusCode(403, "datos inválidos");
+                if (String.IsNullOrEmpty(client.Email))
+                    return StatusCode(403, "email inválido");
+
+                if(String.IsNullOrEmpty(client.Password))
+                    return StatusCode(403, "contrseña inválida");
+
+                if(String.IsNullOrEmpty(client.FirstName))
+                    return StatusCode(403, "nombre inválido");
+
+                if (String.IsNullOrEmpty(client.LastName))
+                    return StatusCode(403, "apellido inválido");
 
                 //buscamos si ya existe el usuario
                 Client user = _clientRepository.FindByEmail(client.Email);
