@@ -11,7 +11,7 @@ namespace HomeBanking.Repositories
 
         public bool ExistsCardNumber(string cardNumber)
         {
-            return GetAllCards().Any(card => card.Number == cardNumber);
+            return FindByCondition(card => card.Number == cardNumber).Any();
         }
 
         public IEnumerable<Card> GetAllCards()
