@@ -9,6 +9,11 @@ namespace HomeBanking.Repositories
         {
         }
 
+        public bool ExistsAccountNumber(string accountNumber)
+        {
+            return GetAllAccounts().Any(account => account.Number == accountNumber);
+        }
+
         public Account FindById(long id)
         {
             return FindByCondition(account  => account.Id == id)

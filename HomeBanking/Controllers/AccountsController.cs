@@ -86,7 +86,7 @@ namespace HomeBanking.Controllers
                         Amount = transaction.Amount,
                         Description = transaction.Description,
                         Date = transaction.Date,
-                    }).ToList(),
+                    }).ToList()
                 };
                 return Ok(accountDto);
             }
@@ -94,6 +94,6 @@ namespace HomeBanking.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
-        }
+        }        
     }
 }

@@ -27,8 +27,8 @@ namespace HomeBanking.Models
                 {
                     var accounts = new Account[]
                     {
-                        new Account {ClientId = accountVictor.Id, CreationDate = DateTime.Now, Number = "VIN001", Balance = 0 },
-                        new Account {ClientId = accountVictor.Id, CreationDate = DateTime.Now.AddDays(-2), Number = "VIN002", Balance = 5 }
+                        new Account {ClientId = accountVictor.Id, CreationDate = DateTime.Now, Number = "VIN-00000001", Balance = 0 },
+                        new Account {ClientId = accountVictor.Id, CreationDate = DateTime.Now.AddDays(-2), Number = "VIN-00000002", Balance = 5 }
                     };
                     foreach (Account account in accounts)
                     {
@@ -43,7 +43,7 @@ namespace HomeBanking.Models
                 {
                     var accounts = new Account[]
                     {
-                        new Account {ClientId = accountJulian.Id, CreationDate = DateTime.Now, Number = "VIN003", Balance = 0 },
+                        new Account {ClientId = accountJulian.Id, CreationDate = DateTime.Now, Number = "VIN-00000003", Balance = 0 },
                     };
                     foreach (Account account in accounts)
                     {
@@ -56,7 +56,7 @@ namespace HomeBanking.Models
             if (!context.Transactions.Any())
             {
 
-                var account1 = context.Accounts.FirstOrDefault(c => c.Number == "VIN001");
+                var account1 = context.Accounts.FirstOrDefault(c => c.Number == "VIN-00000001");
 
                 if (account1 != null)
 
@@ -81,7 +81,7 @@ namespace HomeBanking.Models
 
                     context.SaveChanges();
                 }
-                var account2 = context.Accounts.FirstOrDefault(c => c.Number == "VIN002");
+                var account2 = context.Accounts.FirstOrDefault(c => c.Number == "VIN-00000002");
 
                 if (account2 != null)
 
@@ -102,7 +102,7 @@ namespace HomeBanking.Models
 
                     context.SaveChanges();
                 }
-                var account3 = context.Accounts.FirstOrDefault(c => c.Number == "VIN003");
+                var account3 = context.Accounts.FirstOrDefault(c => c.Number == "VIN-00000003");
 
                 if (account3 != null)
 
@@ -214,7 +214,7 @@ namespace HomeBanking.Models
                             CardHolder = client1.FirstName + " " + client1.LastName,
                             Type = CardType.CREDIT,
                             Color = CardColor.TITANIUM,
-                            Number = "2234-6745-552-7888",
+                            Number = "2234-6745-0552-7888",
                             Cvv = 750,
                             FromDate= DateTime.Now,
                             ThruDate= DateTime.Now.AddYears(5),

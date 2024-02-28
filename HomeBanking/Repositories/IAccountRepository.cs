@@ -8,5 +8,6 @@ namespace HomeBanking.Repositories
         void Save(Account account);
         Account FindById(long id);
         Account FindByIdAndClientEmail(long id, string email);
+        bool ExistsAccountNumber(string accountNumber);
     }
 }

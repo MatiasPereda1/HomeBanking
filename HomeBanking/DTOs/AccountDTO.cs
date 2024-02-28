@@ -1,7 +1,10 @@
-﻿namespace HomeBanking.DTOs
+﻿using System.Text.Json.Serialization;
+
+namespace HomeBanking.DTOs
 {
     public class AccountDTO
     {
+        [JsonIgnore]
         public long Id { get; set; }
 
         public string Number { get; set; }
