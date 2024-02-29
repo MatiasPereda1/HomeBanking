@@ -136,6 +136,7 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpGet("current")]
         [Authorize(Policy = "ClientOnly")]
         public IActionResult GetCurrent()

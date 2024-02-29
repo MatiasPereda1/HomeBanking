@@ -9,5 +9,6 @@ namespace HomeBanking.Repositories
         Account FindById(long id);
         Account FindByIdAndClientEmail(long id, string email);
         bool ExistsAccountNumber(string accountNumber);
+        Account FindByNumber(string number);
     }
 }

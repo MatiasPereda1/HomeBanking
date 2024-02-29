@@ -45,7 +45,8 @@ namespace HomeBanking.Repositories
 
         public void Save(Client client)
         {
-            
+            Create(client);
+            SaveChanges();
         }
 
 
