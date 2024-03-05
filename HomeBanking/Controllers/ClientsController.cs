@@ -6,6 +6,7 @@ using HomeBanking.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Sqids;
 using System.Linq;
 using System.Security.Cryptography;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -19,13 +20,15 @@ namespace HomeBanking.Controllers
         private IClientRepository _clientRepository;
         private IAccountRepository _accountRepository;
         private ICardRepository _cardRepository;
+        private SqidsEncoder<long> _sqids;
 
 
-        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository, ICardRepository cardRepository)
+        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository, ICardRepository cardRepository, SqidsEncoder<long> sqids)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _cardRepository = cardRepository;
+            _sqids = sqids;
         }
 
         [HttpGet]
@@ -41,20 +44,18 @@ namespace HomeBanking.Controllers
                 {
                     var newClientDTO = new ClientDTO
                     {
-                        Id = client.Id,
                         Email = client.Email,
                         FirstName = client.FirstName,
                         LastName = client.LastName,
                         Accounts = client.Accounts.Select(ac => new AccountDTO
                         {
-                            Id = ac.Id,
+                            Id = _sqids.Encode(ac.Id),
                             Balance = ac.Balance,
                             CreationDate = ac.CreationDate,
                             Number = ac.Number
                         }).ToList(),
                         Loans = client.ClientLoans.Select(cl => new ClientLoanDTO
                         {
-                            Id = cl.Id,
                             LoanId = cl.LoanId,
                             Name = cl.Loan.Name,
                             Amount = cl.Amount,
@@ -62,7 +63,6 @@ namespace HomeBanking.Controllers
                         }).ToList(),
                         Cards = client.Cards.Select(c => new CardDTO
                         {
-                            Id = c.Id,
                             CardHolder = c.CardHolder,
                             Color = c.Color.ToString(),
                             Cvv = c.Cvv,
@@ -96,22 +96,19 @@ namespace HomeBanking.Controllers
                 }
 
                 var clientDTO = new ClientDTO
-
                 {
-                    Id = client.Id,
                     Email = client.Email,
                     FirstName = client.FirstName,
                     LastName = client.LastName,
                     Accounts = client.Accounts.Select(ac => new AccountDTO
                     {
-                        Id = ac.Id,
+                        Id = _sqids.Encode(ac.Id),
                         Balance = ac.Balance,
                         CreationDate = ac.CreationDate,
                         Number = ac.Number
                     }).ToList(),
                     Loans = client.ClientLoans.Select(cl => new ClientLoanDTO
                     {
-                        Id = cl.Id,
                         LoanId = cl.LoanId,
                         Name = cl.Loan.Name,
                         Amount = cl.Amount,
@@ -119,7 +116,6 @@ namespace HomeBanking.Controllers
                     }).ToList(),
                     Cards = client.Cards.Select(c => new CardDTO
                     {
-                        Id = c.Id,
                         CardHolder = c.CardHolder,
                         Color = c.Color.ToString(),
                         Cvv = c.Cvv,
@@ -159,20 +155,18 @@ namespace HomeBanking.Controllers
 
                 var clientDTO = new ClientDTO
                 {
-                    Id = client.Id,
                     Email = client.Email,
                     FirstName = client.FirstName,
                     LastName = client.LastName,
                     Accounts = client.Accounts.Select(ac => new AccountDTO
                     {
-                        Id = ac.Id,
+                        Id = _sqids.Encode(ac.Id),
                         Balance = ac.Balance,
                         CreationDate = ac.CreationDate,
                         Number = ac.Number
                     }).ToList(),
                     Loans = client.ClientLoans.Select(cl => new ClientLoanDTO
                     {
-                        Id = cl.Id,
                         LoanId = cl.LoanId,
                         Name = cl.Loan.Name,
                         Amount = cl.Amount,
@@ -180,7 +174,6 @@ namespace HomeBanking.Controllers
                     }).ToList(),
                     Cards = client.Cards.Select(c => new CardDTO
                     {
-                        Id = c.Id,
                         CardHolder = c.CardHolder,
                         Color = c.Color.ToString(),
                         Cvv = c.Cvv,
@@ -220,11 +213,11 @@ namespace HomeBanking.Controllers
                 if (_clientRepository.ExistsByEmail(client.Email))
                     return StatusCode(403, "Email está en uso");
 
-                int accountNumber = CardUtils.RandomNumber(8);
+                string accountNumber = "VIN-" + CardUtils.RandomNumber(8);
 
-                while (_accountRepository.ExistsAccountNumber((string) "VIN-".Concat(accountNumber.ToString())))
+                while (_accountRepository.ExistsAccountNumber(accountNumber))
                 {
-                    accountNumber = CardUtils.RandomNumber(8);
+                    accountNumber = "VIN-" + CardUtils.RandomNumber(8);
                 }
 
                 Client newClient = new Client
@@ -237,7 +230,7 @@ namespace HomeBanking.Controllers
                     {
                         new Account
                         {
-                            Number = (string) "VIN-".Concat(accountNumber.ToString()),
+                            Number = accountNumber,
                             CreationDate = DateTime.Now,
                             Balance = 0
                         }
@@ -302,7 +295,7 @@ namespace HomeBanking.Controllers
 
                 AccountDTO accountDTO = new AccountDTO()
                 {
-                    Id = account.Id,
+                    Id = _sqids.Encode(account.Id),
                     Balance = account.Balance,
                     CreationDate = account.CreationDate,
                     Number = account.Number
@@ -390,7 +383,6 @@ namespace HomeBanking.Controllers
 
                 CardDTO outCardDTO = new CardDTO
                 {
-                    Id = card.Id,
                     CardHolder = card.CardHolder,
                     Color = card.Color.ToString(),
                     Cvv = card.Cvv,
@@ -431,7 +423,7 @@ namespace HomeBanking.Controllers
                     client.Accounts.Select(account => 
                     new AccountDTO
                     {
-                        Id = account.Id,
+                        Id = _sqids.Encode(account.Id),
                         Number = account.Number,
                         CreationDate = account.CreationDate,
                         Balance = account.Balance,
@@ -467,7 +459,6 @@ namespace HomeBanking.Controllers
                     client.Cards.Select(card =>
                     new CardDTO
                     {
-                        Id = card.Id,
                         CardHolder = card.CardHolder,
                         Color = card.Color.ToString(),
                         Cvv = card.Cvv,

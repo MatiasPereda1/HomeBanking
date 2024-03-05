@@ -4,6 +4,7 @@ using HomeBanking.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Sqids;
 
 namespace HomeBanking.Controllers
 {
@@ -12,10 +13,12 @@ namespace HomeBanking.Controllers
     public class AccountsController : ControllerBase
     {
         private IAccountRepository _accountRepository;
+        private readonly SqidsEncoder<long> _sqids;
 
-        public AccountsController(IAccountRepository accountRepository)
+        public AccountsController(IAccountRepository accountRepository, SqidsEncoder<long> sqids)
         {
             _accountRepository = accountRepository;
+            _sqids = sqids;
         }
 
         [HttpGet]
@@ -23,7 +26,7 @@ namespace HomeBanking.Controllers
         public IActionResult Get()
         {
             try
-            {
+            {                
                 var accounts = _accountRepository.GetAllAccounts();
 
                 var accountsDTOs = new List<AccountDTO>();
@@ -32,13 +35,12 @@ namespace HomeBanking.Controllers
                 {
                     var newAccountDTO = new AccountDTO
                     {
-                        Id = account.Id,
+                        Id = _sqids.Encode(account.Id),
                         Number = account.Number,
                         CreationDate = account.CreationDate,
                         Balance = account.Balance,
                         Transactions = account.Transactions.Select(transaction => new TransactionDTO
                         {
-                            Id = transaction.Id,
                             Type = transaction.Type.ToString(),
                             Amount = transaction.Amount,
                             Description = transaction.Description,
@@ -57,7 +59,7 @@ namespace HomeBanking.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Policy = "ClientOnly")]
-        public IActionResult Get(int id)
+        public IActionResult Get(string id)
         {
             try
             {
@@ -68,20 +70,19 @@ namespace HomeBanking.Controllers
 
                 string email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
 
-                Account account = _accountRepository.FindByIdAndClientEmail(id, email);
+                Account account = _accountRepository.FindByIdAndClientEmail(_sqids.Decode(id).FirstOrDefault(), email);
 
                 if (account == null)
                     return Forbid();
 
                 var accountDto = new AccountDTO
                 {
-                    Id = account.Id,
+                    Id = _sqids.Encode(account.Id),
                     Number = account.Number,
                     CreationDate = account.CreationDate,
                     Balance = account.Balance,
                     Transactions = account.Transactions.Select(transaction => new TransactionDTO
                     {
-                        Id = transaction.Id,
                         Type = transaction.Type.ToString(),
                         Amount = transaction.Amount,
                         Description = transaction.Description,

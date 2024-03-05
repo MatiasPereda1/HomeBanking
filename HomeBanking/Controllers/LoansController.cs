@@ -5,6 +5,7 @@ using HomeBanking.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Sqids;
 using System.Transactions;
 
 namespace HomeBanking.Controllers
@@ -17,14 +18,15 @@ namespace HomeBanking.Controllers
         private IAccountRepository _accountRepository;
         private ILoanRepository _loanRepository;
         private IClientLoanRepository _clientLoanRepository;
-        private ITransactionRepository _transactionRepository;
+        private SqidsEncoder<long> _sqids;
 
-        public LoansController(IClientRepository clientRepository, IAccountRepository accountRepository, ILoanRepository loanRepository,IClientLoanRepository clientLoanRepository)
+        public LoansController(IClientRepository clientRepository, IAccountRepository accountRepository, ILoanRepository loanRepository,IClientLoanRepository clientLoanRepository, SqidsEncoder<long> sqids)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _loanRepository = loanRepository;
             _clientLoanRepository = clientLoanRepository;
+            _sqids = sqids;
         }
 
         [HttpGet]
@@ -37,7 +39,7 @@ namespace HomeBanking.Controllers
 
                 var loansDTOs = loans.Select(loan => new LoanDTO()
                 {
-                    Id = loan.Id,
+                    Id = _sqids.Encode(loan.Id),
                     Name = loan.Name,
                     MaxAmount = loan.MaxAmount,
                     Payments = loan.Payments
@@ -70,7 +72,7 @@ namespace HomeBanking.Controllers
 
                 var client = _clientRepository.FindByEmail(email);
 
-                var loan = _loanRepository.FindById(loanApplicationDTO.LoanId);
+                var loan = _loanRepository.FindById( _sqids.Decode(loanApplicationDTO.LoanId).FirstOrDefault() );
 
                 if (loan == null)
                     return Forbid();
@@ -91,7 +93,7 @@ namespace HomeBanking.Controllers
                     Amount = Math.Truncate( (loanApplicationDTO.Amount * 1.2) * 100) / 100,
                     Payments = loanApplicationDTO.Payments,
                     ClientId = client.Id,
-                    LoanId = loanApplicationDTO.LoanId    
+                    LoanId = _sqids.Decode(loanApplicationDTO.LoanId).FirstOrDefault()
                 };
 
                 var transaction = new Models.Transaction()

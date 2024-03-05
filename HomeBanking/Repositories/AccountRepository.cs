@@ -11,7 +11,7 @@ namespace HomeBanking.Repositories
 
         public bool ExistsAccountNumber(string accountNumber)
         {
-            return FindByCondition(account => account.Number == accountNumber).Any();
+            return FindByCondition(account => account.Number.Equals(accountNumber)).Any();
         }
 
         public Account FindById(long id)
