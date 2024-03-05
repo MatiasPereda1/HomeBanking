@@ -1,4 +1,5 @@
 ﻿using HomeBanking.Models.Enums;
+using HomeBanking.Utils;
 
 namespace HomeBanking.Models
 {
@@ -10,8 +11,8 @@ namespace HomeBanking.Models
             {
                 var clients = new Client[]
                 {
-                    new Client { Email = "vcoronado@vinotinto.com", FirstName="Victor", LastName="Coronado", Password="123456"},
-                    new Client { Email = "jcaballero@gmail.com", FirstName="Julian", LastName="Caballero", Password="123456"}
+                    new Client { Email = "vcoronado@vinotinto.com", FirstName = "Victor", LastName = "Coronado", Password = PasswordsUtils.HashPassword("123456")},
+                    new Client { Email = "jcaballero@gmail.com", FirstName = "Julian", LastName = "Caballero", Password = PasswordsUtils.HashPassword("123456")}
                 };
 
                 context.Clients.AddRange(clients);
@@ -142,12 +143,9 @@ namespace HomeBanking.Models
 
                 context.SaveChanges();
 
-                //ahora agregaremos los clientloan (Prestamos del cliente)
-                //usaremos al único cliente que tenemos y le agregaremos un préstamo de cada item
                 var client1 = context.Clients.FirstOrDefault(c => c.Email == "vcoronado@gmail.com");
                 if (client1 != null)
                 {
-                    //ahora usaremos los 3 tipos de prestamos
                     var loan1 = context.Loans.FirstOrDefault(l => l.Name == "Hipotecario");
                     if (loan1 != null)
                     {

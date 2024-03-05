@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Transactions;
 
 namespace HomeBanking.Controllers
 {
@@ -47,9 +48,7 @@ namespace HomeBanking.Controllers
 
 
                 if (User.FindFirst("Client") == null && User.FindFirst("Admin") == null)
-                {
                     return Forbid();
-                }
 
                 string email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
 
@@ -60,9 +59,7 @@ namespace HomeBanking.Controllers
                 var toAccount = _accountRepository.FindByNumber(transferDTO.ToAccountNumber);
 
                 if (fromClient == null)
-                {
                     return Forbid();
-                }                
 
                 if (fromAccount is null)
                     return Forbid();
@@ -74,7 +71,7 @@ namespace HomeBanking.Controllers
                     return Forbid();
 
 
-                var transactionFrom = new Transaction()
+                var transactionFrom = new Models.Transaction()
                 {
                     AccountId = fromAccount.Id,
                     Type = TransactionType.DEBIT,
@@ -83,7 +80,7 @@ namespace HomeBanking.Controllers
                     Date = DateTime.Now
                 };
 
-                var transactionTo = new Transaction()
+                var transactionTo = new Models.Transaction()
                 {
                     AccountId = toAccount.Id,
                     Type = TransactionType.CREDIT,
@@ -92,14 +89,19 @@ namespace HomeBanking.Controllers
                     Date = DateTime.Now
                 };
 
-                _transactionRepository.Save(transactionFrom);
-                _transactionRepository.Save(transactionTo);
+                using (var scope = new TransactionScope())
+                {
+                    _transactionRepository.Save(transactionFrom);
+                    _transactionRepository.Save(transactionTo);
 
-                fromAccount.Balance -= transferDTO.Amount;
-                toAccount.Balance += transferDTO.Amount;
+                    fromAccount.Balance -= transferDTO.Amount;
+                    toAccount.Balance += transferDTO.Amount;
 
-                _accountRepository.Save(fromAccount);
-                _accountRepository.Save(toAccount);
+                    _accountRepository.Save(fromAccount);
+                    _accountRepository.Save(toAccount);
+
+                    scope.Complete();
+                }                
 
                 return Created();
             }

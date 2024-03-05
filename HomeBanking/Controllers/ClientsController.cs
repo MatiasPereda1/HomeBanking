@@ -218,13 +218,11 @@ namespace HomeBanking.Controllers
 
                 //buscamos si ya existe el usuario
                 if (_clientRepository.ExistsByEmail(client.Email))
-                {
                     return StatusCode(403, "Email está en uso");
-                }
 
                 int accountNumber = CardUtils.RandomNumber(8);
 
-                while (_accountRepository.ExistsAccountNumber((string)"VIN-".Concat(accountNumber.ToString())))
+                while (_accountRepository.ExistsAccountNumber((string) "VIN-".Concat(accountNumber.ToString())))
                 {
                     accountNumber = CardUtils.RandomNumber(8);
                 }
@@ -232,14 +230,14 @@ namespace HomeBanking.Controllers
                 Client newClient = new Client
                 {
                     Email = client.Email,
-                    Password = client.Password,
+                    Password = PasswordsUtils.HashPassword(client.Password),
                     FirstName = client.FirstName,
                     LastName = client.LastName,
                     Accounts = new Account[]
                     {
                         new Account
                         {
-                            Number = (string)"VIN-".Concat(accountNumber.ToString()),
+                            Number = (string) "VIN-".Concat(accountNumber.ToString()),
                             CreationDate = DateTime.Now,
                             Balance = 0
                         }
