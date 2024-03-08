@@ -2,12 +2,12 @@
 using HomeBanking.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using HomeBanking.DTOs;
 using HomeBanking.Utils;
+using HomeBanking.Services;
 
 namespace HomeBanking.Controllers
 {
@@ -15,30 +15,18 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private IClientRepository _clientRepository;
-        public AuthController(IClientRepository clientRepository)
+        private IAuthService _authService;
+        public AuthController(IAuthService authService)
         {
-            _clientRepository = clientRepository;
+            _authService = authService;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDTO userDto)
+        public async Task<IActionResult> Login([FromBody] ClientInDTO userDto)
         {
             try
             {
-                Client client = _clientRepository.FindByEmail(userDto.Email);
-                if (client == null || !PasswordsUtils.VerifyPassword(userDto.Password, client.Password))
-                    return Unauthorized();
-
-                var claims = new List<Claim>
-                {
-                    new Claim(Regex.IsMatch(userDto.Email, @".*@vinotinto\.com") ? "Admin" : "Client", client.Email)
-                };
-
-                var claimsIdentity = new ClaimsIdentity(
-                    claims,
-                    CookieAuthenticationDefaults.AuthenticationScheme
-                    );
+                ClaimsIdentity claimsIdentity = _authService.Login(userDto);
 
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
@@ -69,4 +57,3 @@ namespace HomeBanking.Controllers
         }
     }
 }
-

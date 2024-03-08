@@ -1,4 +1,7 @@
-﻿namespace HomeBanking.Models
+﻿using HomeBanking.DTOs;
+using HomeBanking.Utils;
+
+namespace HomeBanking.Models
 {
     public class Client
     {

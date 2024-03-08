@@ -1,33 +1,23 @@
 ﻿using HomeBanking.DTOs;
-using HomeBanking.Models;
-using HomeBanking.Models.Enums;
-using HomeBanking.Repositories;
+using HomeBanking.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Sqids;
-using System.Transactions;
 
 namespace HomeBanking.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class LoansController : ControllerBase
-    {        
-        private IClientRepository _clientRepository;
-        private IAccountRepository _accountRepository;
-        private ILoanRepository _loanRepository;
-        private IClientLoanRepository _clientLoanRepository;
-        private SqidsEncoder<long> _sqids;
+    {
+        private ILoansService _loansService;
+        private IUsersService _usersService;
 
-        public LoansController(IClientRepository clientRepository, IAccountRepository accountRepository, ILoanRepository loanRepository,IClientLoanRepository clientLoanRepository, SqidsEncoder<long> sqids)
+        public LoansController(ILoansService loansService, IUsersService usersService)
         {
-            _clientRepository = clientRepository;
-            _accountRepository = accountRepository;
-            _loanRepository = loanRepository;
-            _clientLoanRepository = clientLoanRepository;
-            _sqids = sqids;
+            _loansService = loansService;
+            _usersService = usersService;
         }
+
 
         [HttpGet]
         [Authorize(Policy = "ClientOnly")]
@@ -35,15 +25,7 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                var loans = _loanRepository.GetAllLoans();
-
-                var loansDTOs = loans.Select(loan => new LoanDTO()
-                {
-                    Id = _sqids.Encode(loan.Id),
-                    Name = loan.Name,
-                    MaxAmount = loan.MaxAmount,
-                    Payments = loan.Payments
-                }).ToList();
+                IEnumerable<LoanDTO> loansDTOs = _loansService.GetAllLoans();
 
                 return Ok(loansDTOs);
             }
@@ -68,53 +50,9 @@ namespace HomeBanking.Controllers
                 if (string.IsNullOrEmpty(loanApplicationDTO.ToAccountNumber))
                     return Forbid();
 
-                var email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
+                string email = _usersService.GetCurrentClientLoggedEmail(User);
 
-                var client = _clientRepository.FindByEmail(email);
-
-                var loan = _loanRepository.FindById( _sqids.Decode(loanApplicationDTO.LoanId).FirstOrDefault() );
-
-                if (loan == null)
-                    return Forbid();
-
-                if (loan.Payments.Split(",").Any(payment => payment == loanApplicationDTO.Payments) == false)
-                    return Forbid();
-
-                if (loan.MaxAmount < loanApplicationDTO.Amount)
-                    return Forbid();
-
-                var account = _accountRepository.FindByNumber(loanApplicationDTO.ToAccountNumber);
-
-                if (account.ClientId != client.Id)
-                    return Forbid();
-
-                var clientLoan = new ClientLoan()
-                {
-                    Amount = Math.Truncate( (loanApplicationDTO.Amount * 1.2) * 100) / 100,
-                    Payments = loanApplicationDTO.Payments,
-                    ClientId = client.Id,
-                    LoanId = _sqids.Decode(loanApplicationDTO.LoanId).FirstOrDefault()
-                };
-
-                var transaction = new Models.Transaction()
-                {
-                    Type = TransactionType.CREDIT,
-                    Amount = loanApplicationDTO.Amount,
-                    Description = $"{loan.Name} loan approved",
-                    Date = DateTime.Now,
-                    AccountId = account.Id
-                };
-
-                using(var scope = new TransactionScope())
-                {
-                    account.Balance += loanApplicationDTO.Amount;
-                    account.Transactions.Add(transaction);
-
-                    _accountRepository.Save(account);
-                    _clientLoanRepository.Save(clientLoan);
-
-                    scope.Complete();
-                }               
+                _loansService.CreateLoan(loanApplicationDTO, email);
 
                 return Created();
             }
@@ -123,7 +61,5 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-
     } 
 }

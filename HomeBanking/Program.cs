@@ -1,5 +1,6 @@
 using HomeBanking.Models;
 using HomeBanking.Repositories;
+using HomeBanking.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Sqids;
@@ -41,6 +42,13 @@ builder.Services.AddScoped<ICardRepository, CardRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IClientLoanRepository, ClientLoanRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+
+builder.Services.AddScoped<IAccountsService, AccountsService>();
+builder.Services.AddScoped<IClientsService, ClientsService>();
+builder.Services.AddScoped<ITransactionsService, TransactionsService>();
+builder.Services.AddScoped<ILoansService, LoansService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddSingleton(new SqidsEncoder<long>(new()
 {

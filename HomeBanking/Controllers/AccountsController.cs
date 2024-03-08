@@ -1,10 +1,7 @@
 ﻿using HomeBanking.DTOs;
-using HomeBanking.Models;
-using HomeBanking.Repositories;
+using HomeBanking.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Sqids;
 
 namespace HomeBanking.Controllers
 {
@@ -12,13 +9,13 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private IAccountRepository _accountRepository;
-        private readonly SqidsEncoder<long> _sqids;
+        private IAccountsService _accountsService;
+        private IUsersService _usersService;
 
-        public AccountsController(IAccountRepository accountRepository, SqidsEncoder<long> sqids)
+        public AccountsController(IAccountsService accountsService, IUsersService usersService)
         {
-            _accountRepository = accountRepository;
-            _sqids = sqids;
+            _accountsService = accountsService;
+            _usersService = usersService;
         }
 
         [HttpGet]
@@ -26,29 +23,9 @@ namespace HomeBanking.Controllers
         public IActionResult Get()
         {
             try
-            {                
-                var accounts = _accountRepository.GetAllAccounts();
-
-                var accountsDTOs = new List<AccountDTO>();
-
-                foreach (var account in accounts) 
-                {
-                    var newAccountDTO = new AccountDTO
-                    {
-                        Id = _sqids.Encode(account.Id),
-                        Number = account.Number,
-                        CreationDate = account.CreationDate,
-                        Balance = account.Balance,
-                        Transactions = account.Transactions.Select(transaction => new TransactionDTO
-                        {
-                            Type = transaction.Type.ToString(),
-                            Amount = transaction.Amount,
-                            Description = transaction.Description,
-                            Date = transaction.Date,
-                        }).ToList()
-                    };
-                    accountsDTOs.Add(newAccountDTO);
-                }
+            {
+                IEnumerable<AccountDTO> accountsDTOs = _accountsService.GetAllAccounts();
+                                
                 return Ok(accountsDTOs);
             }
             catch (Exception ex)
@@ -63,32 +40,10 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                if (User.FindFirst("Client") == null && User.FindFirst("Admin") == null)
-                {
-                    return Forbid();
-                }
+                string clientEmail = _usersService.GetCurrentClientLoggedEmail(User);
 
-                string email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
+                AccountDTO accountDto = _accountsService.GetAccount(id, clientEmail);
 
-                Account account = _accountRepository.FindByIdAndClientEmail(_sqids.Decode(id).FirstOrDefault(), email);
-
-                if (account == null)
-                    return Forbid();
-
-                var accountDto = new AccountDTO
-                {
-                    Id = _sqids.Encode(account.Id),
-                    Number = account.Number,
-                    CreationDate = account.CreationDate,
-                    Balance = account.Balance,
-                    Transactions = account.Transactions.Select(transaction => new TransactionDTO
-                    {
-                        Type = transaction.Type.ToString(),
-                        Amount = transaction.Amount,
-                        Description = transaction.Description,
-                        Date = transaction.Date,
-                    }).ToList()
-                };
                 return Ok(accountDto);
             }
             catch (Exception ex)

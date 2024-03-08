@@ -1,6 +1,6 @@
 ﻿namespace HomeBanking.DTOs
 {
-    public class UserDTO
+    public class ClientInDTO
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

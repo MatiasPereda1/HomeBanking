@@ -1,12 +1,7 @@
 ﻿using HomeBanking.DTOs;
-using HomeBanking.Models;
-using HomeBanking.Models.Enums;
-using HomeBanking.Repositories;
+using HomeBanking.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.Transactions;
 
 namespace HomeBanking.Controllers
 {
@@ -14,15 +9,13 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
-        private IClientRepository _clientRepository;
-        private IAccountRepository _accountRepository;
-        private ITransactionRepository _transactionRepository;
+        private ITransactionsService _transactionsService;
+        private IUsersService _usersService;
 
-        public TransactionsController(IClientRepository clientRepository, IAccountRepository accountRepository, ITransactionRepository transactionRepository)
+        public TransactionsController(ITransactionsService transactionsService, IUsersService usersService)
         {
-            _clientRepository = clientRepository;
-            _accountRepository = accountRepository;
-            _transactionRepository = transactionRepository;
+            _transactionsService = transactionsService;
+            _usersService = usersService;
         }
 
         [HttpPost]
@@ -32,76 +25,20 @@ namespace HomeBanking.Controllers
             try
             {
                 if (string.IsNullOrEmpty(transferDTO.FromAccountNumber))
-                    return StatusCode(403, "cuenta del remitente inválida");
+                    return StatusCode(403, "Cuenta remitente invalida");
 
                 if (string.IsNullOrEmpty(transferDTO.ToAccountNumber))
-                    return StatusCode(403, "cuenta del destinatario inválida");
+                    return StatusCode(403, "Cuenta destinatario invalida");
 
                 if (string.IsNullOrEmpty(transferDTO.Description))
-                    return StatusCode(403, "descripcion inválido");
+                    return StatusCode(403, "Descripcion inválido");
 
                 if (transferDTO.Amount <= 0)
-                    return StatusCode(403, "monto inválido");
+                    return StatusCode(403, "Monto invalido");
 
-                if (transferDTO.FromAccountNumber == transferDTO.ToAccountNumber)
-                    return Forbid();
+                string email = _usersService.GetCurrentClientLoggedEmail(User);
 
-
-                if (User.FindFirst("Client") == null && User.FindFirst("Admin") == null)
-                    return Forbid();
-
-                string email = User.FindFirst("Client") == null ? User.FindFirst("Admin").Value : User.FindFirst("Client").Value;
-
-                Client fromClient = _clientRepository.FindByEmail(email);            
-
-                var fromAccount = fromClient.Accounts.FirstOrDefault(account => account.Number == transferDTO.FromAccountNumber);
-
-                var toAccount = _accountRepository.FindByNumber(transferDTO.ToAccountNumber);
-
-                if (fromClient == null)
-                    return Forbid();
-
-                if (fromAccount is null)
-                    return Forbid();
-
-                if (toAccount is null)
-                    return Forbid();
-
-                if (transferDTO.Amount > fromAccount.Balance)
-                    return Forbid();
-
-
-                var transactionFrom = new Models.Transaction()
-                {
-                    AccountId = fromAccount.Id,
-                    Type = TransactionType.DEBIT,
-                    Amount = transferDTO.Amount * -1,
-                    Description = transferDTO.Description,
-                    Date = DateTime.Now
-                };
-
-                var transactionTo = new Models.Transaction()
-                {
-                    AccountId = toAccount.Id,
-                    Type = TransactionType.CREDIT,
-                    Amount = transferDTO.Amount,
-                    Description = transferDTO.Description,
-                    Date = DateTime.Now
-                };
-
-                using (var scope = new TransactionScope())
-                {
-                    _transactionRepository.Save(transactionFrom);
-                    _transactionRepository.Save(transactionTo);
-
-                    fromAccount.Balance -= transferDTO.Amount;
-                    toAccount.Balance += transferDTO.Amount;
-
-                    _accountRepository.Save(fromAccount);
-                    _accountRepository.Save(toAccount);
-
-                    scope.Complete();
-                }                
+                _transactionsService.CreateTransaction(transferDTO, email);
 
                 return Created();
             }
