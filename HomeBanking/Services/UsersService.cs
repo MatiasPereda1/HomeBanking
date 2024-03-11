@@ -8,10 +8,9 @@ namespace HomeBanking.Services
 
         public string GetCurrentClientLoggedEmail(ClaimsPrincipal user)
         {
-            if (user.FindFirst("Client") == null && user.FindFirst("Admin") == null)
-                throw new Exception("Usuario no loggeado");
+            var userClaims = user.Claims;
 
-            return user.FindFirst("Client") == null ? user.FindFirst("Admin").Value : user.FindFirst("Client").Value;
+            return userClaims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email).Value;
         }
     }
 }

@@ -4,6 +4,8 @@ using HomeBanking.Models.Enums;
 using HomeBanking.Repositories;
 using HomeBanking.Utils;
 using Sqids;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace HomeBanking.Services
 {
@@ -60,6 +62,7 @@ namespace HomeBanking.Services
                 Password = PasswordsUtils.HashPassword(userDTO.Password),
                 FirstName = userDTO.FirstName,
                 LastName = userDTO.LastName,
+                Role = Regex.IsMatch(userDTO.Email, @".*@vinotinto\.com") ? RoleType.ADMIN : RoleType.CLIENT,
                 Accounts = new List<Account>
                 {
                     new Account()
@@ -110,7 +113,7 @@ namespace HomeBanking.Services
                 throw new Exception("Cliente no encontrado");
 
             CardType cardType = (CardType)Enum.Parse(typeof(CardType), cardInDTO.Type);
-            CardColor cardColor = (CardColor)Enum.Parse(typeof(CardColor), cardInDTO.Color);
+            CardColorType cardColor = (CardColorType)Enum.Parse(typeof(CardColorType), cardInDTO.Color);
 
             if (client.Cards.Any(card => card.Type == cardType && card.Color == cardColor))
                 throw new Exception("Tarjeta denegada");

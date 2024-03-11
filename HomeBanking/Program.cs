@@ -2,8 +2,11 @@ using HomeBanking.Models;
 using HomeBanking.Repositories;
 using HomeBanking.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Sqids;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,16 +27,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
       });
 
 //autorización
-builder.Services.AddAuthorization(options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
-    options.AddPolicy("ClientOnly", policy => 
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
     {
-        policy.RequireAssertion(context =>
-            context.User.HasClaim(c => c.Type == "Admin") ||
-            context.User.HasClaim(c => c.Type == "Client"));
-    });
-
-    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Admin"));
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
 });
 
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
@@ -48,7 +55,6 @@ builder.Services.AddScoped<IClientsService, ClientsService>();
 builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 builder.Services.AddScoped<ILoansService, LoansService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddSingleton(new SqidsEncoder<long>(new()
 {

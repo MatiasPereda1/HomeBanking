@@ -19,7 +19,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "ClientOnly")]
+        [Authorize(Roles = "CLIENT")]
         public IActionResult Post([FromBody] TransferDTO transferDTO)
         {
             try

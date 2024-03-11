@@ -20,7 +20,7 @@ namespace HomeBanking.Controllers
 
 
         [HttpGet]
-        [Authorize(Policy = "ClientOnly")]
+        [Authorize(Roles = "CLIENT")]
         public IActionResult Get()
         {
             try
@@ -36,7 +36,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "ClientOnly")]
+        [Authorize(Roles = "CLIENT")]
         public IActionResult Post([FromBody] LoanApplicationDTO loanApplicationDTO)
         {
             try

@@ -1,6 +1,6 @@
 ﻿namespace HomeBanking.Models.Enums
 {
-    public enum CardColor
+    public enum CardColorType
     {
         GOLD,
         SILVER,

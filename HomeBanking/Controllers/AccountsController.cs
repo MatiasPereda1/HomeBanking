@@ -19,7 +19,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Roles = "ADMIN")]
         public IActionResult Get()
         {
             try
@@ -35,7 +35,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "ClientOnly")]
+        [Authorize(Roles = "CLIENT")]
         public IActionResult Get(string id)
         {
             try
