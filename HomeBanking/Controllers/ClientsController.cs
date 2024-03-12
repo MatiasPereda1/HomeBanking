@@ -52,7 +52,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet("current")]
-        [Authorize(Roles = "CLIENT")]
+        [Authorize(Roles = "CLIENT, ADMIN")]
         public IActionResult GetCurrent()
         {
             try
@@ -98,7 +98,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpPost("current/accounts")]
-        [Authorize(Roles = "CLIENT")]
+        [Authorize(Roles = "CLIENT, ADMIN")]
         public IActionResult Post()
         {
             try
@@ -115,7 +115,7 @@ namespace HomeBanking.Controllers
             }
         }
         [HttpPost("current/cards")]
-        [Authorize(Roles = "CLIENT")]
+        [Authorize(Roles = "CLIENT, ADMIN")]
         public IActionResult Post([FromBody] CardInDTO cardInDTO)
         {
             try
@@ -132,7 +132,7 @@ namespace HomeBanking.Controllers
             }
         }
         [HttpGet("current/accounts")]
-        [Authorize(Roles = "CLIENT")]
+        [Authorize(Roles = "CLIENT, ADMIN")]
         public IActionResult GetCurrentClientAccounts()
         {
             try
@@ -149,7 +149,7 @@ namespace HomeBanking.Controllers
             }
         }
         [HttpGet("current/cards")]
-        [Authorize(Roles = "CLIENT")]
+        [Authorize(Roles = "CLIENT, ADMIN")]
         public IActionResult GetCurrentClientCards()
         {
             try

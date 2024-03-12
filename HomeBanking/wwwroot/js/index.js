@@ -30,7 +30,12 @@
                 email: this.email,
                 password: this.password
                 })
-                .then(response => window.location.href = "/accounts.html")
+                .then(response => {
+                    let token = response.data;
+                    console.log("este es el token", token);
+                    sessionStorage.setItem('TOKEN', token);
+                    window.location.href = "/accounts.html"
+                })
                 .catch(() => {
                     this.errorMsg = "Sign in failed, check the information"
                     this.errorToats.show();
@@ -57,12 +62,13 @@
                 lastName: this.lastName,
                 password: this.password,
                 email: this.email
+            }
+            )
+            .then(() => { this.signIn(event) })
+            .catch(() => {
+                this.errorMsg = "Sign up failed, check the information"
+                this.errorToats.show();
             })
-                .then(() => { this.signIn(event) })
-                .catch(() => {
-                    this.errorMsg = "Sign up failed, check the information"
-                    this.errorToats.show();
-                })
         },
         showSignUpToogle: function () {
             this.showSignUp = !this.showSignUp;

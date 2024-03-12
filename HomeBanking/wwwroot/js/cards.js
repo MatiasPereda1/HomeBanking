@@ -11,7 +11,14 @@
     methods: {
         getData: function () {
             //axios.get("/api/clients/1")
-            axios.get("/api/clients/current")
+            let token = sessionStorage.getItem('TOKEN');
+            axios.get("/api/clients/current",
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            )   
                 .then(function (response) {
                     //get client ifo
                     app.clientInfo = response.data;
@@ -28,12 +35,8 @@
             return new Date(date).toLocaleDateString('en-gb');
         },
         signOut: function(){
-            axios.post('/api/auth/logout')
-            .then(response => window.location.href="/index.html")
-            .catch(() =>{
-                this.errorMsg = "Sign out failed"   
-                this.errorToats.show();
-            })
+            sessionStorage.clear();
+            window.location.href = "/index.html";
         },
     },
     mounted: function () {

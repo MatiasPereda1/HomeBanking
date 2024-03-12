@@ -11,12 +11,8 @@ var app = new Vue({
             return new Date(date).toLocaleDateString('en-gb');
         },
         signOut: function(){
-            axios.post('/api/auth/logout')
-            .then(response => window.location.href="/index.html")
-            .catch(() =>{
-                this.errorMsg = "Sign out failed"   
-                this.errorToats.show();
-            })
+            sessionStorage.clear();
+            window.location.href = "/index.html";
         },
         create: function(event){
             event.preventDefault();
@@ -35,10 +31,17 @@ var app = new Vue({
                     this.errorMsg = error.response.data;  
                     this.errorToats.show();
                 }) */
+                let token = sessionStorage.getItem('TOKEN');
                 axios.post('/api/clients/current/cards',{
                     type: this.cardType,
                     color: this.cardColor,
-                })
+                },
+                {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+                }
+                )
                     .then(() => { window.location.href = "/cards.html" })
                     .catch(() => {
                         this.errorMsg = "Sign up failed, check the information"

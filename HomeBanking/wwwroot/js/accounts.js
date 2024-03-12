@@ -9,7 +9,14 @@ var app = new Vue({
     methods:{
         getData: function(){
             //axios.get("/api/clients/1")
-            axios.get("/api/clients/current")
+            let token = sessionStorage.getItem('TOKEN');
+            axios.get("/api/clients/current",
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            )
             .then(function (response) {
                 //get client ifo
                 app.clientInfo = response.data;
@@ -25,15 +32,18 @@ var app = new Vue({
             return new Date(date).toLocaleDateString('en-gb');
         },
         signOut: function () {
-            axios.post('/api/auth/logout')
-                .then(response => window.location.href = "/index.html")
-                .catch(() => {
-                    this.errorMsg = "Sign out failed"
-                    this.errorToats.show();
-                })
+            sessionStorage.clear();
+            window.location.href = "/index.html";
         },
-        create: function(){
-            axios.post('/api/clients/current/accounts')
+        create: function () {
+            let token = sessionStorage.getItem('TOKEN');
+            axios.post('/api/clients/current/accounts', null,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            )
             .then(response => window.location.reload())
             .catch((error) =>{
                 this.errorMsg = error.response.data;  

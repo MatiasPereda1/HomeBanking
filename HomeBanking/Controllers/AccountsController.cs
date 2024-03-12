@@ -35,7 +35,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "CLIENT")]
+        [Authorize(Roles = "CLIENT, ADMIN")]
         public IActionResult Get(string id)
         {
             try

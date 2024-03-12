@@ -13,8 +13,10 @@ var app = new Vue({
         fees: []
     },
     methods:{
-        getData: function(){
-            Promise.all([axios.get("/api/loans"),axios.get("/api/clients/current/accounts")])
+        getData: function () {
+            let token = sessionStorage.getItem('TOKEN');
+            Promise.all([axios.get("/api/loans", { headers: { 'Authorization': `Bearer ${token}` } }), axios.get("/api/clients/current/accounts", { headers: { 'Authorization': `Bearer ${token}` } })
+            ])
             .then((response) => {
                 //get loan types ifo
                 this.loanTypes = response[0].data;
@@ -48,8 +50,14 @@ var app = new Vue({
                 this.modal.show();
             }
         },
-        apply: function(){
-            axios.post("/api/loans",{loanId: this.loanTypeId, amount: this.amount, payments: this.payments, toAccountNumber: this.accountToNumber})
+        apply: function () {
+            let token = sessionStorage.getItem('TOKEN');
+            axios.post("/api/loans", { loanId: this.loanTypeId, amount: this.amount, payments: this.payments, toAccountNumber: this.accountToNumber },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
             .then(response => { 
                 this.modal.hide();
                 this.okmodal.show();
@@ -75,12 +83,8 @@ var app = new Vue({
             this.feesmodal.show();
         },
         signOut: function(){
-            axios.post('/api/auth/logout')
-            .then(response => window.location.href="/index.html")
-            .catch(() =>{
-                this.errorMsg = "Sign out failed"   
-                this.errorToats.show();
-            })
+            sessionStorage.clear();
+            window.location.href = "/index.html";
         },
     },
     mounted: function(){

@@ -13,8 +13,13 @@ var app = new Vue({
         description: ""
     },
     methods:{
-        getData: function(){
-            axios.get("/api/clients/current/accounts")
+        getData: function () {
+            let token = sessionStorage.getItem('TOKEN');
+            axios.get("/api/clients/current/accounts", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then((response) => {
                 //get client ifo
                 this.clientAccounts = response.data;
@@ -54,12 +59,18 @@ var app = new Vue({
             }
             axios.post(`/api/transactions?
             fromAccountNumber=${this.accountFromNumber}&toAccountNumber=${this.accountToNumber}&amount=${this.amount}&description=${this.description}`,config) */
+            let token = sessionStorage.getItem('TOKEN');
             axios.post('/api/transactions',
                 {
                     fromAccountNumber: this.accountFromNumber,
                     toAccountNumber: this.accountToNumber,
                     amount: this.amount,
                     description: this.description
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
             )
             .then(response => { 
@@ -85,12 +96,8 @@ var app = new Vue({
             window.location.reload();
         },
         signOut: function(){
-            axios.post('/api/auth/logout')
-            .then(response => window.location.href="/index.html")
-            .catch(() =>{
-                this.errorMsg = "Sign out failed"   
-                this.errorToats.show();
-            })
+            sessionStorage.clear();
+            window.location.href = "/index.html";
         },
     },
     mounted: function(){
